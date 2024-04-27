@@ -1,6 +1,6 @@
 import WebSocket, { CLOSED, CLOSING, CONNECTING, OPEN } from 'ws';
 
-export enum SnipeEvent {
+enum SnipeEvent {
     addToken = "addToken",
     tokenAddress = "tokenAddress",
     routerAddress = "routerAddress",
@@ -9,7 +9,7 @@ export enum SnipeEvent {
     simulateSubscribe = "simulateSubscribe"
 }
 
-export class LuckyManClient {
+class LuckyManClient {
     //@ts-ignore
     public ws: WebSocket;
     public eventHandlers;
@@ -84,4 +84,9 @@ export class LuckyManClient {
             throw (`WebSocket is not Connected yet.`)
         }
     }
+}
+
+export {
+    LuckyManClient,
+    SnipeEvent
 }

@@ -1,16 +1,18 @@
 import WebSocket from 'ws';
-export declare enum SnipeEvent {
+declare enum SnipeEvent {
     addToken = "addToken",
     tokenAddress = "tokenAddress",
     routerAddress = "routerAddress",
     liquidity = "liquidity",
-    buyTax = "buyTax"
+    buyTax = "buyTax",
+    simulateSubscribe = "simulateSubscribe"
 }
-export declare class LuckyManClient {
+declare class LuckyManClient {
     ws: WebSocket;
     eventHandlers: Map<SnipeEvent, Function>;
     private url;
     readyState: 0 | 1 | 2 | 3;
+    private retryTimeout;
     /** The connection is not yet open. */
     static readonly CONNECTING: 0;
     /** The connection is open and ready to communicate. */
@@ -19,11 +21,12 @@ export declare class LuckyManClient {
     static readonly CLOSING: 2;
     /** The connection is closed. */
     static readonly CLOSED: 3;
-    constructor(url: string | URL);
+    constructor(url: string | URL, retryTimeout?: number);
     private initializeWebSocket;
     /**
      * on
      */
     on(event: SnipeEvent, callback: Function, params?: any): Promise<void>;
 }
+export { LuckyManClient, SnipeEvent };
 //# sourceMappingURL=index.d.ts.map

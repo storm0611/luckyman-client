@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LuckyManClient = exports.SnipeEvent = void 0;
+exports.SnipeEvent = exports.LuckyManClient = void 0;
 const ws_1 = __importStar(require("ws"));
 var SnipeEvent;
 (function (SnipeEvent) {
@@ -41,24 +41,34 @@ var SnipeEvent;
     SnipeEvent["routerAddress"] = "routerAddress";
     SnipeEvent["liquidity"] = "liquidity";
     SnipeEvent["buyTax"] = "buyTax";
+    SnipeEvent["simulateSubscribe"] = "simulateSubscribe";
 })(SnipeEvent || (exports.SnipeEvent = SnipeEvent = {}));
 class LuckyManClient {
-    constructor(url) {
+    constructor(url, retryTimeout = 0) {
         this.initializeWebSocket = () => __awaiter(this, void 0, void 0, function* () {
             this.ws = new ws_1.default(this.url);
             this.ws.onopen = () => {
-                console.info("Socket is opened.");
                 this.readyState = ws_1.OPEN;
+                console.info("Socket is opened.");
             };
-            this.ws.onerror = (error) => {
-                console.error(error.error);
-                this.readyState = ws_1.CLOSING;
-            };
+            this.ws.onerror = (error) => __awaiter(this, void 0, void 0, function* () {
+                this.readyState = ws_1.CONNECTING;
+                if (this.retryTimeout && error.error.code == "ECONNREFUSED") {
+                    console.error(error.error);
+                }
+                else {
+                    throw (error.error);
+                }
+            });
             this.ws.onclose = () => __awaiter(this, void 0, void 0, function* () {
-                console.info("Socket is closed. Trying to reconnect after 1 second.");
                 this.readyState = ws_1.CLOSED;
-                // await new Promise(resolve => setTimeout(resolve, 1000));
-                setTimeout(this.initializeWebSocket, 1000);
+                if (this.retryTimeout) {
+                    console.info(`Socket is closed. Trying to reconnect after ${this.retryTimeout} ms.`);
+                    setTimeout(this.initializeWebSocket, this.retryTimeout);
+                }
+                else {
+                    console.info("Socket is closed.");
+                }
             });
             this.ws.onmessage = (event) => {
                 const data = JSON.parse(event.data.toString());
@@ -74,6 +84,7 @@ class LuckyManClient {
         this.eventHandlers = new Map();
         this.url = url;
         this.readyState = ws_1.CONNECTING;
+        this.retryTimeout = retryTimeout;
         this.initializeWebSocket();
     }
     /**
@@ -86,9 +97,7 @@ class LuckyManClient {
                     yield yield new Promise(resolve => setTimeout(resolve, 1000));
                 }
                 if (this.readyState == ws_1.OPEN) {
-                    if (event != SnipeEvent.addToken) {
-                        this.eventHandlers.set(event, callback);
-                    }
+                    this.eventHandlers.set(event, callback);
                     this.ws.send(JSON.stringify({ msgType: event, data: params }));
                 }
                 else {
