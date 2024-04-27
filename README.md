@@ -3,7 +3,7 @@
 npm install luckyman-client
 ```
 # Usage
-```cli
+```typescript
 import { LuckyManClient, SnipeEvent } from "luckyman-client/dist"
 
 const luckyManClient = new LuckyManClient("ws://localhost:3002");
