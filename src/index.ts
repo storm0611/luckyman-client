@@ -9,7 +9,7 @@ enum SnipeEvent {
     simulateSubscribe = "simulateSubscribe",
     tokenInfo = "tokenInfo",
     unsubscribe = "unsubscribe",
-    poolInfo = "poolInfo",
+    pairInfo = "pairInfo",
 }
 
 class LuckyManClient {

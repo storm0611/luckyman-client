@@ -8,7 +8,7 @@ declare enum SnipeEvent {
     simulateSubscribe = "simulateSubscribe",
     tokenInfo = "tokenInfo",
     unsubscribe = "unsubscribe",
-    poolInfo = "poolInfo"
+    pairInfo = "pairInfo"
 }
 declare class LuckyManClient {
     ws: WebSocket;

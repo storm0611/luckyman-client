@@ -44,7 +44,7 @@ var SnipeEvent;
     SnipeEvent["simulateSubscribe"] = "simulateSubscribe";
     SnipeEvent["tokenInfo"] = "tokenInfo";
     SnipeEvent["unsubscribe"] = "unsubscribe";
-    SnipeEvent["poolInfo"] = "poolInfo";
+    SnipeEvent["pairInfo"] = "pairInfo";
 })(SnipeEvent || (exports.SnipeEvent = SnipeEvent = {}));
 class LuckyManClient {
     constructor(url, retryTimeout = 0) {
