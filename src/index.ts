@@ -6,7 +6,10 @@ enum SnipeEvent {
     routerAddress = "routerAddress",
     liquidity = "liquidity",
     buyTax = "buyTax",
-    simulateSubscribe = "simulateSubscribe"
+    simulateSubscribe = "simulateSubscribe",
+    tokenInfo = "tokenInfo",
+    unsubscribe = "unsubscribe",
+    poolInfo = "poolInfo",
 }
 
 class LuckyManClient {
@@ -45,7 +48,7 @@ class LuckyManClient {
             if (this.retryTimeout && error.error.code == "ECONNREFUSED") {
                 console.error(error.error);
             } else {
-                throw(error.error)
+                throw (error.error)
             }
         }
         this.ws.onclose = async () => {
