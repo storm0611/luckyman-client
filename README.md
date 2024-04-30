@@ -49,6 +49,10 @@ const response = await luckyManClient.fetchPairsWithInfoByTokens([
     { token0: "0x..", token1: "0x.." }
 ])
 ```
+### Simulate Tokens
+```typescript
+const response = await luckyManClient.simulateTokens(["0x..", "0x.."]);
+```
 ## WebSocket Subscription Methods
 ### Receive notification when the token which is added into the list is tradable.
 ``` typescript
