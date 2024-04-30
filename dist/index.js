@@ -47,32 +47,21 @@ var SnipeEvent;
     SnipeEvent["pairInfo"] = "pairInfo";
 })(SnipeEvent || (exports.SnipeEvent = SnipeEvent = {}));
 class LuckyManClient {
-    constructor(url, retryTimeout = 0) {
-        this.initializeWebSocket = () => __awaiter(this, void 0, void 0, function* () {
-            this.ws = new ws_1.default(this.url);
-            this.ws.onopen = () => {
+    constructor(httpURL, wsURL, onError = null, onConnect = null, onClose = null) {
+        this.initializeWebSocket = () => {
+            this.ws = new ws_1.default(this.wsURL);
+            this.ws.onopen = (event) => {
                 this.readyState = ws_1.OPEN;
-                console.info("Socket is opened.");
+                this.onConnect && this.onConnect(event);
             };
-            this.ws.onerror = (error) => __awaiter(this, void 0, void 0, function* () {
-                this.readyState = ws_1.CONNECTING;
-                if (this.retryTimeout && error.error.code == "ECONNREFUSED") {
-                    console.error(error.error);
-                }
-                else {
-                    throw (error.error);
-                }
-            });
-            this.ws.onclose = () => __awaiter(this, void 0, void 0, function* () {
+            this.ws.onerror = (event) => {
+                this.readyState = ws_1.CLOSING;
+                this.onError && this.onError(event);
+            };
+            this.ws.onclose = (event) => {
                 this.readyState = ws_1.CLOSED;
-                if (this.retryTimeout) {
-                    console.info(`Socket is closed. Trying to reconnect after ${this.retryTimeout} ms.`);
-                    setTimeout(this.initializeWebSocket, this.retryTimeout);
-                }
-                else {
-                    console.info("Socket is closed.");
-                }
-            });
+                this.onClose && this.onClose(event);
+            };
             this.ws.onmessage = (event) => {
                 const data = JSON.parse(event.data.toString());
                 const func = this.eventHandlers.get(data.snipeEvent);
@@ -83,11 +72,183 @@ class LuckyManClient {
                     console.error(`Received ${data.snipeEvent} Event, but No Handler defined yet.`);
                 }
             };
+        };
+        // Http Methods
+        this.addTokens = (tokens) => __awaiter(this, void 0, void 0, function* () {
+            const res = yield fetch(`${this.httpURL}/api/token/add`, {
+                method: "POST",
+                body: JSON.stringify({
+                    tokens: tokens
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const resData = yield res.json();
+            if (res.status == 201) {
+                console.info(`${resData.count} Tokens Added.`);
+                return { status: "ok", code: res.status };
+            }
+            else {
+                return { error: resData.toString(), code: res.status };
+            }
+        });
+        this.removeTokens = (tokens) => __awaiter(this, void 0, void 0, function* () {
+            const res = yield fetch(`${this.httpURL}/api/token/remove`, {
+                method: "POST",
+                body: JSON.stringify({
+                    tokens: tokens
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const resData = yield res.json();
+            if (res.status == 200) {
+                console.info(`${resData.count} Tokens Removed.`);
+                return { status: "ok", code: res.status };
+            }
+            else {
+                return { error: resData.toString(), code: res.status };
+            }
+        });
+        this.fetchAllTokens = () => __awaiter(this, void 0, void 0, function* () {
+            const res = yield fetch(`${this.httpURL}/api/token/`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const resData = yield res.json();
+            if (res.status == 200) {
+                console.info(`${resData.length} Tokens Fetched.`);
+                return { status: "ok", code: res.status, data: resData };
+            }
+            else {
+                return { error: resData.toString(), code: res.status };
+            }
+        });
+        this.fetchTokensWithInfo = (tokens) => __awaiter(this, void 0, void 0, function* () {
+            const res = yield fetch(`${this.httpURL}/api/token/info`, {
+                method: "POST",
+                body: JSON.stringify({
+                    tokens: tokens
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const resData = yield res.json();
+            if (res.status == 200) {
+                console.info(`${resData.length} Tokens Fetched.`);
+                return { status: "ok", code: res.status, data: resData };
+            }
+            else {
+                return { error: resData.toString(), code: res.status };
+            }
+        });
+        this.simulateTokens = (tokens) => __awaiter(this, void 0, void 0, function* () {
+            const res = yield fetch(`${this.httpURL}/api/token/simulate`, {
+                method: "POST",
+                body: JSON.stringify({
+                    tokens: tokens
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const resData = yield res.json();
+            if (res.status == 200) {
+                console.info(`${resData.length} Pairs Fetched.`);
+                return { status: "ok", code: res.status, data: resData };
+            }
+            else {
+                return { error: resData.toString(), code: res.status };
+            }
+        });
+        this.fetchPairsWithInfo = (pairs) => __awaiter(this, void 0, void 0, function* () {
+            const res = yield fetch(`${this.httpURL}/api/pair/info`, {
+                method: "POST",
+                body: JSON.stringify({
+                    pairs: pairs
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const resData = yield res.json();
+            if (res.status == 200) {
+                console.info(`${resData.length} Pairs Fetched.`);
+                return { status: "ok", code: res.status, data: resData };
+            }
+            else {
+                return { error: resData.toString(), code: res.status };
+            }
+        });
+        this.fetchPairsWithInfoByTokens = (tokenPairs) => __awaiter(this, void 0, void 0, function* () {
+            const res = yield fetch(`${this.httpURL}/api/pair/info2`, {
+                method: "POST",
+                body: JSON.stringify({
+                    tokenPairs: tokenPairs
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const resData = yield res.json();
+            if (res.status == 200) {
+                console.info(`${resData.length} Pairs Fetched.`);
+                return { status: "ok", code: res.status, data: resData };
+            }
+            else {
+                return { error: resData.toString(), code: res.status };
+            }
+        });
+        // Websocket Methods
+        this.listenToToken = (callback_1, ...args_1) => __awaiter(this, [callback_1, ...args_1], void 0, function* (callback, onError = (error) => { }) {
+            if (this.readyState == ws_1.OPEN || this.readyState == ws_1.CONNECTING) {
+                while (this.readyState == ws_1.CONNECTING) {
+                    yield new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                if (this.readyState == ws_1.OPEN) {
+                    this.eventHandlers.set(SnipeEvent.simulateSubscribe, callback);
+                    this.errorHandlers.set(SnipeEvent.simulateSubscribe, onError);
+                    this.ws.send(JSON.stringify({ msgType: SnipeEvent.simulateSubscribe }));
+                }
+                else {
+                    throw (`WebSocket is not Opened yet.`);
+                }
+            }
+            else {
+                throw (`WebSocket is not Connected yet.`);
+            }
+        });
+        this.unsubscribe = (event) => __awaiter(this, void 0, void 0, function* () {
+            if (this.readyState == ws_1.OPEN || this.readyState == ws_1.CONNECTING) {
+                while (this.readyState == ws_1.CONNECTING) {
+                    yield new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                if (this.readyState == ws_1.OPEN) {
+                    this.eventHandlers.delete(event);
+                    this.errorHandlers.delete(event);
+                    this.ws.send(JSON.stringify({ msgType: SnipeEvent.unsubscribe, data: { snipeEvent: event } }));
+                }
+                else {
+                    throw (`WebSocket is not Opened yet.`);
+                }
+            }
+            else {
+                throw (`WebSocket is not Connected yet.`);
+            }
         });
         this.eventHandlers = new Map();
-        this.url = url;
+        this.errorHandlers = new Map();
+        this.httpURL = httpURL;
+        this.wsURL = wsURL;
         this.readyState = ws_1.CONNECTING;
-        this.retryTimeout = retryTimeout;
+        this.onError = onError;
+        this.onConnect = onConnect;
+        this.onClose = onClose;
         this.initializeWebSocket();
     }
     /**
@@ -97,7 +258,7 @@ class LuckyManClient {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.readyState == ws_1.OPEN || this.readyState == ws_1.CONNECTING) {
                 while (this.readyState == ws_1.CONNECTING) {
-                    yield yield new Promise(resolve => setTimeout(resolve, 1000));
+                    yield new Promise(resolve => setTimeout(resolve, 1000));
                 }
                 if (this.readyState == ws_1.OPEN) {
                     this.eventHandlers.set(event, callback);
