@@ -12,8 +12,8 @@ npm install --upgrade luckyman-client
 import { LuckyManClient, SnipeEvent } from "luckyman-client/dist"
 
 const luckyManClient = new LuckyManClient(
-    'http://localhost:3001',
-    'ws://localhost:3002',
+    'http://',
+    'ws://',
     (error) => console.log(error.error),
     () => console.log("Socket is Opened."),
     () => console.log("Socket is Closed.")
