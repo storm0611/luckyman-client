@@ -2,58 +2,70 @@
 ```cli
 npm install luckyman-client
 ```
+Or upgrade
+```cli
+npm install --upgrade luckyman-client
+```
 # Usage
 ## Create instance of LuckyManClient
 ```typescript
 import { LuckyManClient, SnipeEvent } from "luckyman-client/dist"
 
-const luckyManClient = new LuckyManClient("ws://localhost:3002");
+const luckyManClient = new LuckyManClient(
+    'http://localhost:3001',
+    'ws://localhost:3002',
+    (error) => console.log(error.error),
+    () => console.log("Socket is Opened."),
+    () => console.log("Socket is Closed.")
+);
 ```
 ## One-time SnipeEvent Subscription
-### Add Token to snipe.
-Add the token to the list in server to detect the point when it can be tradable.
+### Add Tokens to snipe.
+Add several tokens to the list in server to detect the point when it can be tradable.
 ```typescript
-luckyManClient.on(SnipeEvent.addToken, (data: { availableToSnipe: any; err: any; }) => {
-    const { availableToSnipe, err } = data;
-    if (err == null) {
-        console.info(`Available to Snipe? ${availableToSnipe ? "Yes" : "No, it's already in trading situation."}`)
-    } else {
-        console.error(err);
-    }
-}, { tokenAddress: "0xd582879453337bd149ae53ec2092b0af5281d1d7" });
+const response = await luckyManClient.addTokens(["0x..", "0x.."]);
 ```
-### Fetch details of token
+### Remove Tokens from snipe token list
 ```typescript
-luckyManClient.on(SnipeEvent.tokenInfo, (data: any) => {
-    console.log(data);
-}, { tokenAddress: "0xd582879453337bd149ae53ec2092b0af5281d1d7" });
+const response = await luckyManClient.removeTokens(["0x..", "0x.."]);
 ```
-### Fetch details of pair
-With pair Address
+### Fetch all tokens which is being detected the tradable point
 ```typescript
-luckyManClient.on(SnipeEvent.pairInfo, (data: any) => {
-    console.log(data);
-}, { pairAddress: "0xE6e718b302264bCd6d068355645a722b8911434a" });
-
+const response = await luckyManClient.fetchAllTokens();
+```
+### Fetch details of tokens
+```typescript
+const response = await luckyManClient.fetchTokensWithInfo(["0x..", "0x..]);
+```
+### Fetch details of pairs
+With pair Addresses
+```typescript
+const response = await luckyManClient.fetchPairsWithInfo(["0x..", "0x.."]);
 ```
 With token addresses
 ```typescript
-luckyManClient.on(SnipeEvent.pairInfo, (data: any) => {
-    console.log(data);
-}, { pairAddress: "", token0Address: "0x4300000000000000000000000000000000000004", token1Address: "0x473DFAda6870ba95f4e635dA48946905Eeb236A1" });
+const response = await luckyManClient.fetchPairsWithInfoByTokens([
+    { token0: "0x..", token1: "0x.." },
+    { token0: "0x..", token1: "0x.." }
+])
 ```
 ## Real-time subscription
 ### Receive notification when the token which is added into the list is tradable.
 ``` typescript
-luckyManClient.on(SnipeEvent.simulateSubscribe, (data: { tokenAddress: string, simulateResult: any[] }) => {
-    const { tokenAddress, simulateResult } = data;
-    console.info(`Token Address is available to trading`);
-    console.log({ tokenAddress, simulateResult });
-})
+luckyManClient.listenToToken(
+    (data: {
+        tokenAddress: string,
+        simulateResult: {
+            router: string,
+            buyFee: number,
+            sellFee: number,
+            txLimit: number
+        }[]
+    }) => {
+        console.log(data)
+    });
 ```
 ## Unsubscription
-```
-luckyManClient.on(SnipeEvent.unsubscribe, () => {
-    console.info(`Unsubscribed`);
-})
+```typescript
+luckyManClient.unsubscribe(SnipeEvent.simulateSubscribe)
 ```
