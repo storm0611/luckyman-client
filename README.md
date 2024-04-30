@@ -19,7 +19,7 @@ const luckyManClient = new LuckyManClient(
     () => console.log("Socket is Closed.")
 );
 ```
-## One-time SnipeEvent Subscription
+## Http Methods
 ### Add Tokens to snipe.
 Add several tokens to the list in server to detect the point when it can be tradable.
 ```typescript
@@ -49,7 +49,7 @@ const response = await luckyManClient.fetchPairsWithInfoByTokens([
     { token0: "0x..", token1: "0x.." }
 ])
 ```
-## Real-time subscription
+## WebSocket Subscription Methods
 ### Receive notification when the token which is added into the list is tradable.
 ``` typescript
 luckyManClient.listenToToken(
