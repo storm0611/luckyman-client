@@ -158,7 +158,7 @@ class LuckyManClient {
         });
         const resData = await res.json();
         if (res.status == 200) {
-            console.info(`${resData.length} Pairs Fetched.`)
+            console.info(`${resData.length} Tokens Simulated.`)
             return { status: "ok", code: res.status, data: resData }
         } else {
             return { error: resData.toString(), code: res.status }
