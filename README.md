@@ -72,7 +72,7 @@ luckyManClient.listenToToken(
             buyFee: number,
             sellFee: number,
             txLimit: number
-        }
+        }[]
     }) => {
         console.log(data)
     });
