@@ -61,10 +61,18 @@ luckyManClient.listenToToken(
         tokenAddress: string,
         simulateResult: {
             router: string,
+            pairFee: number,
             buyFee: number,
             sellFee: number,
             txLimit: number
-        }[]
+        }[],
+        simulateResultV3: {
+            router: string,
+            pairFee: number,
+            buyFee: number,
+            sellFee: number,
+            txLimit: number
+        }
     }) => {
         console.log(data)
     });
